@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portify - Login & Signup</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --primary-hover-color: #2563eb;
+            --background-color: #0f172a;
+            --surface-color: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden; 
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 900px;
+            min-height: 600px;
+            background-color: var(--surface-color);
+            border-radius: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            overflow: hidden; 
+            animation: fadeIn 0.8s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Left Side Panel */
+        .graphics-panel {
+            width: 50%;
+            background: linear-gradient(160deg, #3b82f6, #8b5cf6);
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .graphics-panel h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            line-height: 1.2;
+            z-index: 2;
+        }
+        
+        .graphics-panel p {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 10px;
+            z-index: 2;
+        }
+        
+        /* Background decorative shapes */
+        .graphics-panel::before, .graphics-panel::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.05);
+            z-index: 1;
+        }
+        
+        .graphics-panel::before {
+            width: 300px;
+            height: 300px;
+            bottom: -150px;
+            left: -100px;
+        }
+        
+        .graphics-panel::after {
+            width: 200px;
+            height: 200px;
+            top: -80px;
+            right: -80px;
+        }
+
+        /* Right Side Form  */
+        .form-container {
+            width: 50%;
+            padding: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative; /* For form positioning */
+        }
+        
+        .form-wrapper {
+            position: absolute;
+            width: calc(100% - 100px); /* Account for padding */
+            transition: transform 0.6s cubic-bezier(0.76, 0, 0.24, 1), opacity 0.6s ease;
+        }
+        
+        /* Form States */
+        .form-wrapper.login-active,
+        .form-wrapper.signup-active {
+            transform: translateX(0);
+            opacity: 1;
+            z-index: 10;
+        }
+        
+        .form-wrapper.login-inactive {
+            transform: translateX(-150%);
+            opacity: 0;
+            z-index: 1;
+        }
+        
+        .form-wrapper.signup-inactive {
+            transform: translateX(150%);
+            opacity: 0;
+            z-index: 1;
+        }
+
+        .form-container h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .form-container .subtitle {
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: #0f172a;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+
+        .auth-button {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .auth-button:hover {
+            background-color: var(--primary-hover-color);
+        }
+
+        .google-button {
+            width: 100%;
+            padding: 12px;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: #333;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .google-button img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .google-button:hover {
+            background-color: #f8f9fa;
+        }
+
+        .or-divider {
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .or-divider::before,
+        .or-divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 45%;
+            height: 1px;
+            background-color: var(--border-color);
+        }
+
+        .or-divider::before {
+            left: 0;
+        }
+
+        .or-divider::after {
+            right: 0;
+        }
+
+        .toggle-text {
+            margin-top: 25px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .toggle-link {
+            color: var(--primary-color);
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .toggle-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 800px) {
+            .main-container {
+                flex-direction: column;
+                height: auto;
+                min-height: 100vh;
+                border-radius: 0;
+            }
+            
+            .graphics-panel {
+                width: 100%;
+                height: 250px;
+                text-align: center;
+                padding: 30px;
+            }
+
+            .graphics-panel h1 {
+                font-size: 2.5rem;
+            }
+            
+            .form-container {
+                width: 100%;
+                padding: 40px 30px;
+            }
+            
+            .form-wrapper {
+                position: relative; /* Change from absolute for stacking */
+                width: 100%;
+                transform: none !important; /* Remove slide transforms */
+                opacity: 1 !important;
+            }
+            
+            /* Hide inactive form on mobile */
+            .form-wrapper.login-inactive,
+            .form-wrapper.signup-inactive {
+                display: none;
+            }
+            
+            .form-wrapper.login-active,
+            .form-wrapper.signup-active {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <!-- Graphics Panel (Left Side) -->
+        <div class="graphics-panel">
+            <h1>Portify</h1>
+            <p>Track smarter. Invest wiser. One dashboard for all your assets.</p>
+        </div>
+
+        <!-- Form Container (Right Side) -->
+        <div class="form-container">
+            <!-- Login Form -->
+            <div class="form-wrapper login-active" id="login-form">
+                <h2>Welcome Back</h2>
+                <p class="subtitle">Please enter your details to sign in.</p>
+                <form>
+                    <div class="input-group">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" name="email" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" name="password" required>
+                    </div>
+                    <button type="submit" class="auth-button">Sign In</button>
+                </form>
+                <div class="or-divider">OR</div>
+                <button class="google-button" id="login-google-btn">
+                    <img src="https://www.google.com/favicon.ico" alt="Google">
+                    Continue with Google
+                </button>
+                <p class="toggle-text">
+                    Don't have an account? 
+                    <a href="#" class="toggle-link" id="show-signup">Sign Up</a>
+                </p>
+            </div>
+            
+            <!-- Signup Form -->
+            <div class="form-wrapper signup-inactive" id="signup-form">
+                 <h2>Create Account</h2>
+                <p class="subtitle">Get started with the future of portfolio tracking.</p>
+                <form>
+                    <div class="input-group">
+                        <label for="signup-name">Full Name</label>
+                        <input type="text" id="signup-name" name="name" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="signup-email">Email</label>
+                        <input type="email" id="signup-email" name="email" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="signup-password">Password</label>
+                        <input type="password" id="signup-password" name="password" required>
+                    </div>
+                    <button type="submit" class="auth-button">Create Account</button>
+                </form>
+                <div class="or-divider">OR</div>
+                <button class="google-button" id="signup-google-btn">
+                    <img src="https://www.google.com/favicon.ico" alt="Google">
+                    Sign up with Google
+                </button>
+                <p class="toggle-text">
+                    Already have an account? 
+                    <a href="#" class="toggle-link" id="show-login">Go back to Login</a>
+                </p>
+            </div>
+
+            <!-- OTP Verification Form -->
+            <div class="form-wrapper signup-inactive" id="otp-form">
+                <h2>Verify Email</h2>
+                <p class="subtitle">We've sent a verification code to your email.</p>
+                <form>
+                    <div class="input-group">
+                        <label for="otp-code">Enter OTP Code</label>
+                        <input type="text" id="otp-code" name="otp" required maxlength="6" pattern="[0-9]{6}" 
+                               placeholder="Enter 6-digit code">
+                    </div>
+                    <button type="submit" class="auth-button">Verify OTP</button>
+                </form>
+                <p class="toggle-text">
+                    Didn't receive the code? 
+                    <a href="#" class="toggle-link" id="resend-otp">Resend OTP</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginForm = document.getElementById('login-form');
+            const signupForm = document.getElementById('signup-form');
+            const otpForm = document.getElementById('otp-form');
+            const showSignupLink = document.getElementById('show-signup');
+            const showLoginLink = document.getElementById('show-login');
+            const loginGoogleBtn = document.getElementById('login-google-btn');
+            const signupGoogleBtn = document.getElementById('signup-google-btn');
+            const resendOtpLink = document.getElementById('resend-otp');
+            function showSignup() {
+                // For desktop (sliding animation)
+                loginForm.classList.remove('login-active');
+                loginForm.classList.add('login-inactive');
+                signupForm.classList.remove('signup-inactive');
+                signupForm.classList.add('signup-active');
+                // For mobile (simple show/hide)
+                if (window.innerWidth <= 800) {
+                    loginForm.style.display = 'none';
+                    signupForm.style.display = 'block';
+                }
+            }
+            function showLogin() {
+                // For desktop (sliding animation)
+                signupForm.classList.remove('signup-active');
+                signupForm.classList.add('signup-inactive');
+                loginForm.classList.remove('login-inactive');
+                loginForm.classList.add('login-active');
+                
+                // For mobile (simple show/hide)
+                 if (window.innerWidth <= 800) {
+                    signupForm.style.display = 'none';
+                    loginForm.style.display = 'block';
+                }
+            }
+            
+            showSignupLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                showSignup();
+            });
+
+            showLoginLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                showLogin();
+            });
+            
+            // --- Form Submission Handling ---
+            
+            loginForm.querySelector('form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const email = document.getElementById('login-email').value;
+                console.log('Login attempt with Email:', email);
+                alert('Login form submitted! Check the console (F12) for data.');
+            });
+            
+            signupForm.querySelector('form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const name = document.getElementById('signup-name').value;
+                const email = document.getElementById('signup-email').value;
+                console.log('Signup attempt with Name:', name, 'and Email:', email);
+                // Show OTP form after signup
+                signupForm.classList.remove('signup-active');
+                signupForm.classList.add('signup-inactive');
+                otpForm.classList.remove('signup-inactive');
+                otpForm.classList.add('signup-active');
+            });
+
+            otpForm.querySelector('form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const otp = document.getElementById('otp-code').value;
+                console.log('OTP Verification attempt with code:', otp);
+                alert('OTP verification successful! You can now log in.');
+                showLogin(); // Redirect to login after successful verification
+            });
+
+            // Google Sign-in handlers
+            loginGoogleBtn.addEventListener('click', () => {
+                console.log('Google login attempted');
+                alert('Google login functionality will be implemented with Google OAuth');
+            });
+
+            signupGoogleBtn.addEventListener('click', () => {
+                console.log('Google signup attempted');
+                alert('Google signup functionality will be implemented with Google OAuth');
+            });
+
+            // Resend OTP handler
+            resendOtpLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('Resending OTP...');
+                alert('New OTP has been sent to your email');
+            });
+
+            if (window.innerWidth <= 800) {
+                signupForm.style.display = 'none';
+                otpForm.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
+
