@@ -39,7 +39,7 @@
             flex-grow: 1;
         }
 
-        /* Header */
+        /* --- ENHANCED HEADER STYLES --- */
         .header {
             display: flex;
             justify-content: space-between;
@@ -48,17 +48,76 @@
             border-bottom: 1px solid var(--border-color);
         }
         
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 40px;
+        }
+
         .header .logo {
             font-size: 1.5rem;
             font-weight: 700;
         }
 
-        .header-actions {
+        .header nav ul {
+            display: flex;
+            gap: 25px;
+            list-style: none;
+        }
+
+        .header nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .header nav a.active, .header nav a:hover {
+            color: var(--text-primary);
+        }
+
+        .header-right {
             display: flex;
             align-items: center;
             gap: 20px;
         }
-        
+
+        .search-bar {
+            position: relative;
+        }
+        .search-bar svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+        .search-bar input {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px 12px 8px 35px; /* Left padding for icon */
+            color: var(--text-primary);
+            width: 200px;
+            transition: width 0.3s, background-color 0.2s;
+        }
+        .search-bar input:focus {
+            outline: none;
+            width: 250px;
+            background-color: #2a3a52;
+            border-color: var(--primary-color);
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 5px;
+            position: relative;
+            transition: color 0.2s;
+        }
+        .icon-btn:hover { color: var(--text-primary); }
+
         .header .profile-icon {
             width: 40px;
             height: 40px;
@@ -69,24 +128,8 @@
             justify-content: center;
             font-weight: 600;
             cursor: pointer;
-        }
-
-        .refresh-btn {
-            background: none;
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary);
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: background-color 0.2s, color 0.2s;
-        }
-        .refresh-btn:hover {
-            background-color: var(--surface-color);
-            color: var(--text-primary);
+            border: 2px solid var(--surface-color);
+            box-shadow: 0 0 0 2px var(--primary-color);
         }
 
         /* Main Content Area */
@@ -203,7 +246,6 @@
         .assets-table tbody tr:last-child td { border-bottom: none; }
         .assets-table .asset-name { font-weight: 600; }
 
-        /* Action Buttons in table */
         .action-btn {
             background: none;
             border: 1px solid var(--border-color);
@@ -217,8 +259,7 @@
         .action-btn.delete:hover { background-color: var(--danger-color); color: white; border-color: var(--danger-color); }
         .action-btn.edit:hover { background-color: var(--primary-color); color: white; border-color: var(--primary-color); }
 
-
-        /* --- FOOTER STYLES --- */
+        /* Footer */
         .footer {
             width: 100%;
             background-color: var(--surface-color);
@@ -241,23 +282,10 @@
             color: var(--text-primary);
         }
 
-        .footer-column ul {
-            list-style: none;
-        }
-
-        .footer-column ul li {
-            margin-bottom: 12px;
-        }
-
-        .footer-column ul li a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-        .footer-column ul li a:hover {
-            color: var(--primary-color);
-            text-decoration: underline;
-        }
+        .footer-column ul { list-style: none; }
+        .footer-column ul li { margin-bottom: 12px; }
+        .footer-column ul li a { color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
+        .footer-column ul li a:hover { color: var(--primary-color); text-decoration: underline; }
         
         .footer-bottom {
             display: flex;
@@ -267,62 +295,58 @@
             border-top: 1px solid var(--border-color);
         }
 
-        .footer-bottom .copyright {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-        
-        .footer-socials {
-            display: flex;
-            gap: 20px;
-        }
-        
-        .footer-socials a {
-            color: var(--text-secondary);
-            font-size: 1.2rem;
-            transition: color 0.2s;
-        }
+        .footer-bottom .copyright { font-size: 0.9rem; color: var(--text-secondary); }
+        .footer-socials { display: flex; gap: 20px; }
+        .footer-socials a { color: var(--text-secondary); font-size: 1.2rem; transition: color 0.2s; }
         .footer-socials a:hover { color: var(--primary-color); }
         
-
         /* Responsive Design */
+        @media (max-width: 1024px) {
+            .header nav { display: none; } /* Hide nav links on smaller screens */
+            .search-bar { display: none; } /* Hide search on smaller screens */
+        }
+        
         @media (max-width: 900px) {
-            .footer-grid {
-                grid-template-columns: repeat(2, 1fr); 
-            }
+            .footer-grid { grid-template-columns: repeat(2, 1fr); }
         }
         
         @media (max-width: 768px) {
-            .insights-grid {
-                grid-template-columns: 1fr;
-            }
+            .insights-grid { grid-template-columns: 1fr; }
         }
         
         @media (max-width: 500px) {
-             .footer-grid {
-                grid-template-columns: 1fr; 
-            }
-            .footer-bottom {
-                flex-direction: column-reverse;
-                gap: 20px;
-                text-align: center;
-            }
+             .footer-grid { grid-template-columns: 1fr; }
+            .footer-bottom { flex-direction: column-reverse; gap: 20px; text-align: center; }
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- Header -->
+        <!-- ENHANCED HEADER -->
         <header class="header">
-            <div class="logo">Portify</div>
-            <div class="header-actions">
-                <button class="refresh-btn">
+            <div class="header-left">
+                <div class="logo">Portify</div>
+                <nav>
+                    <ul>
+                        <li><a href="#" class="active">Dashboard</a></li>
+                        <li><a href="#">Markets</a></li>
+                        <li><a href="#">News</a></li>
+                        <li><a href="#">Settings</a></li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="header-right">
+                <div class="search-bar">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                        <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
-                        <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
                     </svg>
-                    Refresh
+                    <input type="text" placeholder="Search assets...">
+                </div>
+                <button class="icon-btn" aria-label="Notifications">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zM8 1.918l-.797.161A4.002 4.002 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4.002 4.002 0 0 0-3.203-3.92L8 1.917zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5.002 5.002 0 0 1 13 6c0 .88.32 4.2 1.22 6z"/>
+                    </svg>
                 </button>
                 <div class="profile-icon">DS</div>
             </div>
@@ -363,7 +387,6 @@
                     <p class="risk-summary">A visual representation of your asset allocation.</p>
                 </div>
             </div>
-
 
             <!-- Assets List -->
             <div class="assets-section">
