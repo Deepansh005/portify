@@ -120,23 +120,25 @@
         
         /* Form States */
         .form-wrapper.login-active,
-        .form-wrapper.signup-active {
+        .form-wrapper.signup-active,
+        .form-wrapper.otp-active {
             transform: translateX(0);
             opacity: 1;
             z-index: 10;
         }
         
-        .form-wrapper.login-inactive {
-            transform: translateX(-150%);
-            opacity: 0;
-            z-index: 1;
-        }
-        
-        .form-wrapper.signup-inactive {
+        .form-wrapper.login-inactive,
+        .form-wrapper.signup-inactive,
+        .form-wrapper.otp-inactive {
             transform: translateX(150%);
             opacity: 0;
             z-index: 1;
         }
+        
+        .form-wrapper.login-inactive {
+             transform: translateX(-150%);
+        }
+
 
         .form-container h2 {
             font-size: 2rem;
@@ -295,12 +297,14 @@
             
             /* Hide inactive form on mobile */
             .form-wrapper.login-inactive,
-            .form-wrapper.signup-inactive {
+            .form-wrapper.signup-inactive,
+            .form-wrapper.otp-inactive {
                 display: none;
             }
             
             .form-wrapper.login-active,
-            .form-wrapper.signup-active {
+            .form-wrapper.signup-active,
+            .form-wrapper.otp-active {
                 display: block;
             }
         }
@@ -374,7 +378,7 @@
             </div>
 
             <!-- OTP Verification Form -->
-            <div class="form-wrapper signup-inactive" id="otp-form">
+            <div class="form-wrapper otp-inactive" id="otp-form">
                 <h2>Verify Email</h2>
                 <p class="subtitle">We've sent a verification code to your email.</p>
                 <form>
@@ -395,101 +399,63 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const loginForm = document.getElementById('login-form');
-            const signupForm = document.getElementById('signup-form');
-            const otpForm = document.getElementById('otp-form');
+            // --- Element Selections ---
+            const loginFormEl = document.getElementById('login-form');
+            const signupFormEl = document.getElementById('signup-form');
+            const otpFormEl = document.getElementById('otp-form');
+            
             const showSignupLink = document.getElementById('show-signup');
             const showLoginLink = document.getElementById('show-login');
-            const loginGoogleBtn = document.getElementById('login-google-btn');
-            const signupGoogleBtn = document.getElementById('signup-google-btn');
-            const resendOtpLink = document.getElementById('resend-otp');
-            function showSignup() {
-                // For desktop (sliding animation)
-                loginForm.classList.remove('login-active');
-                loginForm.classList.add('login-inactive');
-                signupForm.classList.remove('signup-inactive');
-                signupForm.classList.add('signup-active');
-                // For mobile (simple show/hide)
-                if (window.innerWidth <= 800) {
-                    loginForm.style.display = 'none';
-                    signupForm.style.display = 'block';
-                }
+
+            // This single function now controls which form is visible. It's much cleaner!
+            function showForm(formToShow) {
+                const allForms = [loginFormEl, signupFormEl, otpFormEl];
+                const isMobile = window.innerWidth <= 800;
+
+                allForms.forEach(form => {
+                    const isActive = form === formToShow;
+                    const baseClass = form.id.replace('-form', '');
+
+                    if (isMobile) {
+                        form.style.display = isActive ? 'block' : 'none';
+                    } else {
+                        // This applies the correct slide-in/slide-out classes
+                        form.className = `form-wrapper ${baseClass}-${isActive ? 'active' : 'inactive'}`;
+                    }
+                });
             }
-            function showLogin() {
-                // For desktop (sliding animation)
-                signupForm.classList.remove('signup-active');
-                signupForm.classList.add('signup-inactive');
-                loginForm.classList.remove('login-inactive');
-                loginForm.classList.add('login-active');
-                
-                // For mobile (simple show/hide)
-                 if (window.innerWidth <= 800) {
-                    signupForm.style.display = 'none';
-                    loginForm.style.display = 'block';
-                }
-            }
+
+            // --- Event Listeners ---
+            showSignupLink.addEventListener('click', (e) => { e.preventDefault(); showForm(signupFormEl); });
+            showLoginLink.addEventListener('click', (e) => { e.preventDefault(); showForm(loginFormEl); });
             
-            showSignupLink.addEventListener('click', (e) => {
+            // Handle Signup Form Submission
+            signupFormEl.querySelector('form').addEventListener('submit', (e) => {
                 e.preventDefault();
-                showSignup();
+                console.log('Signup form submitted. Showing OTP form...');
+                alert('Signup successful! Please check your console for the (mock) OTP.');
+                showForm(otpFormEl);
             });
 
-            showLoginLink.addEventListener('click', (e) => {
+            // Handle OTP Form Submission
+            otpFormEl.querySelector('form').addEventListener('submit', (e) => {
                 e.preventDefault();
-                showLogin();
-            });
-            
-            // --- Form Submission Handling ---
-            
-            loginForm.querySelector('form').addEventListener('submit', (e) => {
-                e.preventDefault();
-                const email = document.getElementById('login-email').value;
-                console.log('Login attempt with Email:', email);
-                alert('Login form submitted! Check the console (F12) for data.');
-            });
-            
-            signupForm.querySelector('form').addEventListener('submit', (e) => {
-                e.preventDefault();
-                const name = document.getElementById('signup-name').value;
-                const email = document.getElementById('signup-email').value;
-                console.log('Signup attempt with Name:', name, 'and Email:', email);
-                // Show OTP form after signup
-                signupForm.classList.remove('signup-active');
-                signupForm.classList.add('signup-inactive');
-                otpForm.classList.remove('signup-inactive');
-                otpForm.classList.add('signup-active');
+                console.log('OTP form submitted. Redirecting to login...');
+                alert('OTP verification successful! You can now sign in.');
+                showForm(loginFormEl); // This now correctly hides the OTP form
             });
 
-            otpForm.querySelector('form').addEventListener('submit', (e) => {
+            // Handle Login Form Submission
+            loginFormEl.querySelector('form').addEventListener('submit', (e) => {
                 e.preventDefault();
-                const otp = document.getElementById('otp-code').value;
-                console.log('OTP Verification attempt with code:', otp);
-                alert('OTP verification successful! You can now log in.');
-                showLogin(); // Redirect to login after successful verification
+                console.log('Login form submitted!');
+                alert('Login successful! Redirecting to dashboard...');
+                window.location.href = 'dashboard.html';
             });
 
-            // Google Sign-in handlers
-            loginGoogleBtn.addEventListener('click', () => {
-                console.log('Google login attempted');
-                alert('Google login functionality will be implemented with Google OAuth');
-            });
-
-            signupGoogleBtn.addEventListener('click', () => {
-                console.log('Google signup attempted');
-                alert('Google signup functionality will be implemented with Google OAuth');
-            });
-
-            // Resend OTP handler
-            resendOtpLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                console.log('Resending OTP...');
-                alert('New OTP has been sent to your email');
-            });
-
-            if (window.innerWidth <= 800) {
-                signupForm.style.display = 'none';
-                otpForm.style.display = 'none';
-            }
+            // --- Initial State ---
+            // This ensures only the login form is visible when the page first loads.
+            showForm(loginFormEl);
         });
     </script>
 </body>
