@@ -117,7 +117,6 @@
         }
         .icon-btn:hover { color: var(--text-primary); }
         
-        /* --- PROFILE DROPDOWN STYLES --- */
         .profile-menu-container {
             position: relative;
         }
@@ -138,7 +137,7 @@
 
         .dropdown-menu {
             position: absolute;
-            top: 55px; /* Position below the icon */
+            top: 55px;
             right: 0;
             width: 220px;
             background-color: var(--surface-color);
@@ -319,6 +318,19 @@
         }
         .action-btn.delete:hover { background-color: var(--danger-color); color: white; border-color: var(--danger-color); }
         .action-btn.edit:hover { background-color: var(--primary-color); color: white; border-color: var(--primary-color); }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 40px;
+        }
+        .empty-state h3 {
+            font-size: 1.25rem;
+            margin-bottom: 10px;
+        }
+        .empty-state p {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
 
         .footer {
             width: 100%;
@@ -360,6 +372,110 @@
         .footer-socials a { color: var(--text-secondary); font-size: 1.2rem; transition: color 0.2s; }
         .footer-socials a:hover { color: var(--primary-color); }
         
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(15, 23, 42, 0.8);
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background-color: var(--surface-color);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        .modal-header h2 { font-size: 1.5rem; }
+        .modal-close-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+        .form-group input:focus, .form-group select:focus {
+             outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .modal-actions .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .modal-actions .btn-cancel {
+            background-color: var(--border-color);
+            color: var(--text-primary);
+        }
+         .modal-actions .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
         @media (max-width: 1024px) {
             .header nav { display: none; }
             .search-bar { display: none; }
@@ -376,6 +492,9 @@
         @media (max-width: 500px) {
              .footer-grid { grid-template-columns: 1fr; }
             .footer-bottom { flex-direction: column-reverse; gap: 20px; text-align: center; }
+            .modal-content {
+                width: 90%;
+            }
         }
     </style>
 </head>
@@ -396,18 +515,12 @@
             </div>
             <div class="header-right">
                 <div class="search-bar">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>
                     <input type="text" placeholder="Search assets...">
                 </div>
                 <button class="icon-btn" aria-label="Notifications">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zM8 1.918l-.797.161A4.002 4.002 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4.002 4.002 0 0 0-3.203-3.92L8 1.917zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5.002 5.002 0 0 1 13 6c0 .88.32 4.2 1.22 6z"/>
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16"><path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zM8 1.918l-.797.161A4.002 4.002 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4.002 4.002 0 0 0-3.203-3.92L8 1.917zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5.002 5.002 0 0 1 13 6c0 .88.32 4.2 1.22 6z"/></svg>
                 </button>
-                
-                <!-- PROFILE DROPDOWN START -->
                 <div class="profile-menu-container">
                     <div class="profile-icon" id="profile-icon">DS</div>
                     <div class="dropdown-menu" id="dropdown-menu">
@@ -422,178 +535,199 @@
                         </ul>
                         <div class="dropdown-divider"></div>
                         <ul>
-                            <li><a href="/index.html" style="color: var(--danger-color);">Log Out</a></li>
+                            <li><a href="index.html" style="color: var(--danger-color);">Log Out</a></li>
                         </ul>
                     </div>
                 </div>
-                <!-- PROFILE DROPDOWN END -->
             </div>
         </header>
 
-        <!-- Main Content -->
         <main class="main-content">
             <h1 class="page-title">My Portfolio</h1>
-            <div class="stats-grid">
+            
+            <div class="stats-grid hidden" id="stats-grid">
                 <div class="stat-card">
                     <div class="label">Current Value</div>
-                    <div class="value">$12,450.78</div>
-                    <div class="change positive">+ $256.30 (2.1%)</div>
+                    <div class="value">$0.00</div>
+                    <div class="change"></div>
                 </div>
                 <div class="stat-card">
                     <div class="label">Total Investment</div>
-                    <div class="value">$10,150.00</div>
+                    <div class="value">$0.00</div>
                 </div>
                 <div class="stat-card">
                     <div class="label">Overall P/L</div>
-                    <div class="value" style="color: var(--success-color);">$2,300.78</div>
-                    <div class="change positive">+ 22.6%</div>
+                    <div class="value">$0.00</div>
+                    <div class="change"></div>
                 </div>
             </div>
-            <div class="insights-grid">
+
+            <div class="insights-grid hidden" id="insights-grid">
                 <div class="insight-card risk-analyzer">
                     <h3>AI Risk Analysis</h3>
-                    <div class="risk-score">65/100</div>
-                    <div class="risk-level">Medium Risk</div>
-                    <p class="risk-summary">Your portfolio shows moderate volatility, mainly due to a high allocation in crypto assets.</p>
+                    <div class="risk-score">--/100</div>
+                    <div class="risk-level">No Data</div>
+                    <p class="risk-summary">Add assets to your portfolio to calculate your risk score.</p>
                 </div>
                 <div class="insight-card diversification-chart">
                     <h3>Diversification</h3>
-                    <p class="risk-summary">A visual representation of your asset allocation.</p>
+                    <p class="risk-summary">Add assets to see your portfolio's allocation.</p>
                 </div>
             </div>
+
             <div class="assets-section">
                 <div class="assets-header">
                     <h3>Your Assets</h3>
-                    <button class="add-asset-btn">+ Add New Asset</button>
+                    <button class="add-asset-btn" id="add-asset-btn">+ Add New Asset</button>
                 </div>
-                <table class="assets-table">
-                    <thead>
-                        <tr>
-                            <th>Asset</th>
-                            <th>Holdings</th>
-                            <th>Avg. Buy Price</th>
-                            <th>Current Value</th>
-                            <th>Profit/Loss</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <div class="asset-name">Bitcoin (BTC)</div>
-                                <div class="asset-symbol" style="color:var(--text-secondary); font-size:0.9rem;">Crypto</div>
-                            </td>
-                            <td>0.15 BTC</td>
-                            <td>$55,000</td>
-                            <td style="color: var(--success-color);">$10,500</td>
-                            <td style="color: var(--success-color);">$2,250</td>
-                            <td>
-                                <button class="action-btn edit">Edit</button>
-                                <button class="action-btn delete">Delete</button>
-                            </td>
-                        </tr>
-                        <tr>
-                           <td>
-                                <div class="asset-name">Tesla (TSLA)</div>
-                                <div class="asset-symbol" style="color:var(--text-secondary); font-size:0.9rem;">Stock</div>
-                            </td>
-                            <td>5 Shares</td>
-                            <td>$180</td>
-                            <td style="color: var(--danger-color);">$850</td>
-                            <td style="color: var(--danger-color);">- $50</td>
-                            <td>
-                                <button class="action-btn edit">Edit</button>
-                                <button class="action-btn delete">Delete</button>
-                            </td>
-                        </tr>
-                         <tr>
-                           <td>
-                                <div class="asset-name">Nifty 50 Index Fund</div>
-                                <div class="asset-symbol" style="color:var(--text-secondary); font-size:0.9rem;">Mutual Fund</div>
-                            </td>
-                            <td>100 Units</td>
-                            <td>$11</td>
-                            <td style="color: var(--success-color);">$1,100.78</td>
-                            <td style="color: var(--success-color);">$100.78</td>
-                             <td>
-                                <button class="action-btn edit">Edit</button>
-                                <button class="action-btn delete">Delete</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <div id="assets-table-container">
+                    <div class="empty-state" id="empty-state">
+                        <h3>Your Portfolio is Empty</h3>
+                        <p>Add your first asset to start tracking your investments.</p>
+                    </div>
+                    <table class="assets-table hidden" id="assets-table">
+                        <thead>
+                            <tr>
+                                <th>Asset</th>
+                                <th>Holdings</th>
+                                <th>Avg. Buy Price</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="assets-table-body">
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </main>
     </div>
 
-    <!-- Enhanced Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-column">
-                    <h4 class="column-title">Product</h4>
-                    <ul>
-                        <li><a href="#">Features</a></li>
-                        <li><a href="#">Pricing</a></li>
-                        <li><a href="#">Integrations</a></li>
-                        <li><a href="#">API</a></li>
-                    </ul>
-                </div>
-                <div class="footer-column">
-                    <h4 class="column-title">Company</h4>
-                    <ul>
-                        <li><a href="#">About Us</a></li>
-                        <li><a href="#">Careers</a></li>
-                        <li><a href="#">Blog</a></li>
-                        <li><a href="#">Contact Us</a></li>
-                    </ul>
-                </div>
-                <div class="footer-column">
-                    <h4 class="column-title">Resources</h4>
-                    <ul>
-                        <li><a href="#">Help Center</a></li>
-                        <li><a href="#">Guides</a></li>
-                        <li><a href="#">Security</a></li>
-                        <li><a href="#">System Status</a></li>
-                    </ul>
-                </div>
-                <div class="footer-column">
-                    <h4 class="column-title">Legal</h4>
-                    <ul>
-                        <li><a href="#">Privacy Policy</a></li>
-                        <li><a href="#">Terms of Service</a></li>
-                        <li><a href="#">Cookie Policy</a></li>
-                    </ul>
-                </div>
+    <footer class="footer"><!-- Footer --></footer>
+    
+    <div class="modal-overlay" id="add-asset-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add a New Asset</h2>
+                <button class="modal-close-btn" id="modal-close-btn">&times;</button>
             </div>
-            <div class="footer-bottom">
-                <p class="copyright">&copy; 2025 Portify Inc. All rights reserved.</p>
-                <div class="footer-socials">
-                    <a href="#" aria-label="Twitter"><svg fill="currentColor" viewBox="0 0 24 24" width="24" height="24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg></a>
-                    <a href="#" aria-label="LinkedIn"><svg fill="currentColor" viewBox="0 0 24 24" width="24" height="24"><path d="M20.5 2h-17A1.5 1.5 0 0 0 2 3.5v17A1.5 1.5 0 0 0 3.5 22h17a1.5 1.5 0 0 0 1.5-1.5v-17A1.5 1.5 0 0 0 20.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 1 1 8.25 6.5 1.75 1.75 0 0 1 6.5 8.25zM19 19h-3v-4.75c0-1.4-1.2-2.5-2.5-2.5S11 12.85 11 14.25V19h-3v-9h2.9v1.3a3.11 3.11 0 0 1 2.6-1.3c2.4 0 4.5 2.1 4.5 5v4z"></path></svg></a>
-                    <a href="#" aria-label="GitHub"><svg fill="currentColor" viewBox="0 0 24 24" width="24" height="24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.49.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.82c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0 0 22 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"></path></svg></a>
+            <form id="add-asset-form">
+                <div class="form-group">
+                    <label for="asset-type">Asset Type</label>
+                    <select id="asset-type" name="type">
+                        <option value="Stock">Stock</option>
+                        <option value="Crypto">Cryptocurrency</option>
+                        <option value="Mutual Fund">Mutual Fund</option>
+                    </select>
                 </div>
-            </div>
+                <div class="form-group">
+                    <label for="asset-name">Symbol / Name</label>
+                    <input type="text" id="asset-name" name="name" placeholder="e.g., TSLA, Bitcoin, Nifty 50" required>
+                </div>
+                <div class="form-group">
+                    <label for="asset-quantity">Quantity / Units</label>
+                    <input type="number" id="asset-quantity" name="quantity" placeholder="e.g., 10" required step="any">
+                </div>
+                <div class="form-group">
+                    <label for="asset-price">Average Buy Price ($)</label>
+                    <input type="number" id="asset-price" name="price" placeholder="e.g., 180" required step="any">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-cancel" id="modal-cancel-btn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Asset</button>
+                </div>
+            </form>
         </div>
-    </footer>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // --- ELEMENT SELECTIONS ---
             const profileIcon = document.getElementById('profile-icon');
             const dropdownMenu = document.getElementById('dropdown-menu');
+            const addAssetModal = document.getElementById('add-asset-modal');
+            const openModalBtn = document.getElementById('add-asset-btn');
+            const closeModalBtn = document.getElementById('modal-close-btn');
+            const cancelModalBtn = document.getElementById('modal-cancel-btn');
+            const addAssetForm = document.getElementById('add-asset-form');
+            const assetsTable = document.getElementById('assets-table');
+            const assetsTableBody = document.getElementById('assets-table-body');
+            const emptyState = document.getElementById('empty-state');
+            const statsGrid = document.getElementById('stats-grid');
+            const insightsGrid = document.getElementById('insights-grid');
 
-            // Toggle dropdown on icon click
+            // --- PROFILE DROPDOWN LOGIC ---
             profileIcon.addEventListener('click', function(event) {
-                event.stopPropagation(); // Prevents the window click event from firing immediately
+                event.stopPropagation();
                 dropdownMenu.classList.toggle('active');
             });
-
-            // Close dropdown if clicked outside
             window.addEventListener('click', function(event) {
                 if (!profileIcon.contains(event.target) && !dropdownMenu.contains(event.target)) {
                     dropdownMenu.classList.remove('active');
                 }
             });
+
+            // --- MODAL LOGIC ---
+            const openModal = () => addAssetModal.classList.add('active');
+            const closeModal = () => addAssetModal.classList.remove('active');
+
+            openModalBtn.addEventListener('click', openModal);
+            closeModalBtn.addEventListener('click', closeModal);
+            cancelModalBtn.addEventListener('click', closeModal);
+            addAssetModal.addEventListener('click', (event) => {
+                if (event.target === addAssetModal) closeModal();
+            });
+
+            // --- MAIN APPLICATION LOGIC ---
+            addAssetForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const formData = new FormData(addAssetForm);
+                const asset = {
+                    type: formData.get('type'),
+                    name: formData.get('name'),
+                    quantity: formData.get('quantity'),
+                    price: formData.get('price'),
+                };
+                
+                addAssetToTable(asset);
+                updateDashboardVisibility();
+
+                addAssetForm.reset();
+                closeModal();
+            });
+
+            function addAssetToTable(asset) {
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td>
+                        <div class="asset-name">${asset.name}</div>
+                        <div class="asset-symbol" style="color:var(--text-secondary); font-size:0.9rem;">${asset.type}</div>
+                    </td>
+                    <td>${asset.quantity}</td>
+                    <td>$${parseFloat(asset.price).toFixed(2)}</td>
+                    <td>
+                        <button class="action-btn edit">Edit</button>
+                        <button class="action-btn delete">Delete</button>
+                    </td>
+                `;
+                assetsTableBody.appendChild(newRow);
+            }
+
+            function updateDashboardVisibility() {
+                const hasAssets = assetsTableBody.children.length > 0;
+                
+                if(hasAssets) {
+                    emptyState.classList.add('hidden');
+                    assetsTable.classList.remove('hidden');
+                    statsGrid.classList.remove('hidden');
+                    insightsGrid.classList.remove('hidden');
+                } else {
+                    emptyState.classList.remove('hidden');
+                    assetsTable.classList.add('hidden');
+                    statsGrid.classList.add('hidden');
+                    insightsGrid.classList.add('hidden');
+                }
+            }
+            updateDashboardVisibility();
         });
     </script>
 </body>
