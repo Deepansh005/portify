@@ -39,7 +39,6 @@
             flex-grow: 1;
         }
 
-        /* --- ENHANCED HEADER STYLES --- */
         .header {
             display: flex;
             justify-content: space-between;
@@ -95,7 +94,7 @@
             background-color: var(--surface-color);
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            padding: 8px 12px 8px 35px; /* Left padding for icon */
+            padding: 8px 12px 8px 35px;
             color: var(--text-primary);
             width: 200px;
             transition: width 0.3s, background-color 0.2s;
@@ -117,8 +116,13 @@
             transition: color 0.2s;
         }
         .icon-btn:hover { color: var(--text-primary); }
-
-        .header .profile-icon {
+        
+        /* --- PROFILE DROPDOWN STYLES --- */
+        .profile-menu-container {
+            position: relative;
+        }
+        
+        .profile-icon {
             width: 40px;
             height: 40px;
             background-color: var(--primary-color);
@@ -132,7 +136,67 @@
             box-shadow: 0 0 0 2px var(--primary-color);
         }
 
-        /* Main Content Area */
+        .dropdown-menu {
+            position: absolute;
+            top: 55px; /* Position below the icon */
+            right: 0;
+            width: 220px;
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            z-index: 50;
+            overflow: hidden;
+            opacity: 0;
+            transform: scale(0.95) translateY(-10px);
+            transform-origin: top right;
+            transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+            pointer-events: none;
+        }
+
+        .dropdown-menu.active {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            pointer-events: auto;
+        }
+
+        .dropdown-header {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .dropdown-header .name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .dropdown-header .email {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        .dropdown-menu ul {
+            list-style: none;
+            padding: 8px 0;
+        }
+
+        .dropdown-menu a {
+            display: block;
+            padding: 10px 15px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .dropdown-menu a:hover {
+            background-color: #2a3a52;
+            color: var(--text-primary);
+        }
+        
+        .dropdown-divider {
+            height: 1px;
+            background-color: var(--border-color);
+            margin: 8px 0;
+        }
+
         .main-content {
             padding-top: 40px;
         }
@@ -143,7 +207,6 @@
             margin-bottom: 30px;
         }
 
-        /* Stat Cards */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -164,7 +227,6 @@
         .change.positive { color: var(--success-color); }
         .change.negative { color: var(--danger-color); }
 
-        /* Portfolio Insights Section */
         .insights-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -199,7 +261,6 @@
             color: var(--text-secondary);
         }
 
-        /* Assets Table Section */
         .assets-section {
             background-color: var(--surface-color);
             border-radius: 12px;
@@ -259,7 +320,6 @@
         .action-btn.delete:hover { background-color: var(--danger-color); color: white; border-color: var(--danger-color); }
         .action-btn.edit:hover { background-color: var(--primary-color); color: white; border-color: var(--primary-color); }
 
-        /* Footer */
         .footer {
             width: 100%;
             background-color: var(--surface-color);
@@ -300,10 +360,9 @@
         .footer-socials a { color: var(--text-secondary); font-size: 1.2rem; transition: color 0.2s; }
         .footer-socials a:hover { color: var(--primary-color); }
         
-        /* Responsive Design */
         @media (max-width: 1024px) {
-            .header nav { display: none; } /* Hide nav links on smaller screens */
-            .search-bar { display: none; } /* Hide search on smaller screens */
+            .header nav { display: none; }
+            .search-bar { display: none; }
         }
         
         @media (max-width: 900px) {
@@ -323,7 +382,6 @@
 <body>
 
     <div class="container">
-        <!-- ENHANCED HEADER -->
         <header class="header">
             <div class="header-left">
                 <div class="logo">Portify</div>
@@ -348,15 +406,33 @@
                         <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zM8 1.918l-.797.161A4.002 4.002 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4.002 4.002 0 0 0-3.203-3.92L8 1.917zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5.002 5.002 0 0 1 13 6c0 .88.32 4.2 1.22 6z"/>
                     </svg>
                 </button>
-                <div class="profile-icon">DS</div>
+                
+                <!-- PROFILE DROPDOWN START -->
+                <div class="profile-menu-container">
+                    <div class="profile-icon" id="profile-icon">DS</div>
+                    <div class="dropdown-menu" id="dropdown-menu">
+                        <div class="dropdown-header">
+                            <div class="name">Deepanshu</div>
+                            <div class="email">deepanshu@example.com</div>
+                        </div>
+                        <ul>
+                            <li><a href="#">Profile</a></li>
+                            <li><a href="#">API Keys</a></li>
+                            <li><a href="#">Support</a></li>
+                        </ul>
+                        <div class="dropdown-divider"></div>
+                        <ul>
+                            <li><a href="/index.html" style="color: var(--danger-color);">Log Out</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- PROFILE DROPDOWN END -->
             </div>
         </header>
 
         <!-- Main Content -->
         <main class="main-content">
             <h1 class="page-title">My Portfolio</h1>
-
-            <!-- Stats Cards -->
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="label">Current Value</div>
@@ -373,8 +449,6 @@
                     <div class="change positive">+ 22.6%</div>
                 </div>
             </div>
-
-            <!-- Portfolio Insights (AI Features) -->
             <div class="insights-grid">
                 <div class="insight-card risk-analyzer">
                     <h3>AI Risk Analysis</h3>
@@ -387,8 +461,6 @@
                     <p class="risk-summary">A visual representation of your asset allocation.</p>
                 </div>
             </div>
-
-            <!-- Assets List -->
             <div class="assets-section">
                 <div class="assets-header">
                     <h3>Your Assets</h3>
@@ -454,7 +526,7 @@
         </main>
     </div>
 
-    <!-- ENHANCED FOOTER -->
+    <!-- Enhanced Footer -->
     <footer class="footer">
         <div class="container">
             <div class="footer-grid">
@@ -497,20 +569,33 @@
             <div class="footer-bottom">
                 <p class="copyright">&copy; 2025 Portify Inc. All rights reserved.</p>
                 <div class="footer-socials">
-                    <a href="#" aria-label="Twitter">
-                        <svg fill="currentColor" viewBox="0 0 24 24" width="24" height="24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>
-                    </a>
-                    <a href="#" aria-label="LinkedIn">
-                        <svg fill="currentColor" viewBox="0 0 24 24" width="24" height="24"><path d="M20.5 2h-17A1.5 1.5 0 0 0 2 3.5v17A1.5 1.5 0 0 0 3.5 22h17a1.5 1.5 0 0 0 1.5-1.5v-17A1.5 1.5 0 0 0 20.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 1 1 8.25 6.5 1.75 1.75 0 0 1 6.5 8.25zM19 19h-3v-4.75c0-1.4-1.2-2.5-2.5-2.5S11 12.85 11 14.25V19h-3v-9h2.9v1.3a3.11 3.11 0 0 1 2.6-1.3c2.4 0 4.5 2.1 4.5 5v4z"></path></svg>
-                    </a>
-                    <a href="#" aria-label="GitHub">
-                        <svg fill="currentColor" viewBox="0 0 24 24" width="24" height="24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.49.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.82c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0 0 22 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"></path></svg>
-                    </a>
+                    <a href="#" aria-label="Twitter"><svg fill="currentColor" viewBox="0 0 24 24" width="24" height="24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg></a>
+                    <a href="#" aria-label="LinkedIn"><svg fill="currentColor" viewBox="0 0 24 24" width="24" height="24"><path d="M20.5 2h-17A1.5 1.5 0 0 0 2 3.5v17A1.5 1.5 0 0 0 3.5 22h17a1.5 1.5 0 0 0 1.5-1.5v-17A1.5 1.5 0 0 0 20.5 2zM8 19H5v-9h3zM6.5 8.25A1.75 1.75 0 1 1 8.25 6.5 1.75 1.75 0 0 1 6.5 8.25zM19 19h-3v-4.75c0-1.4-1.2-2.5-2.5-2.5S11 12.85 11 14.25V19h-3v-9h2.9v1.3a3.11 3.11 0 0 1 2.6-1.3c2.4 0 4.5 2.1 4.5 5v4z"></path></svg></a>
+                    <a href="#" aria-label="GitHub"><svg fill="currentColor" viewBox="0 0 24 24" width="24" height="24"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.49.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.82c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0 0 22 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"></path></svg></a>
                 </div>
             </div>
         </div>
     </footer>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const profileIcon = document.getElementById('profile-icon');
+            const dropdownMenu = document.getElementById('dropdown-menu');
+
+            // Toggle dropdown on icon click
+            profileIcon.addEventListener('click', function(event) {
+                event.stopPropagation(); // Prevents the window click event from firing immediately
+                dropdownMenu.classList.toggle('active');
+            });
+
+            // Close dropdown if clicked outside
+            window.addEventListener('click', function(event) {
+                if (!profileIcon.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                    dropdownMenu.classList.remove('active');
+                }
+            });
+        });
+    </script>
 </body>
 </html>
 
