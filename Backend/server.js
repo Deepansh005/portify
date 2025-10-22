@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
+const nodemailer = require('nodemailer');
 
 const app = express();
 
@@ -22,7 +23,7 @@ mongoose.connect(MONGO_CONN)
 
 // User Schema 
 const userSchema = new mongoose.Schema({
-    username: { type: String },
+    username: { type: String, unique: true, sparse: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     otp: { type: String },
@@ -59,94 +60,180 @@ function authenticateToken(req, res, next) {
     });
 }
 
+// Helper: create transporter (require real SMTP via env)
+async function createTransporter() {
+    if (!process.env.SMTP_HOST || !process.env.SMTP_USER || !process.env.SMTP_PASS) {
+        throw new Error('SMTP configuration missing. Please set SMTP_HOST, SMTP_USER and SMTP_PASS in your .env');
+    }
+
+    console.log('Creating SMTP transport with:', {
+        host: process.env.SMTP_HOST,
+        port: process.env.SMTP_PORT || 587,
+        secure: process.env.SMTP_SECURE === 'true',
+        user: process.env.SMTP_USER,
+        from: process.env.SMTP_FROM
+    });
+
+    const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT) : 587,
+        secure: process.env.SMTP_SECURE === 'true',
+        auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+        logger: true,
+        debug: true,
+        tls: { rejectUnauthorized: true }
+    });
+
+    // Verify SMTP connection
+    try {
+        await transporter.verify();
+        console.log('SMTP Connection verified successfully!');
+        return transporter;
+    } catch (error) {
+        console.error('SMTP Connection failed:', {
+            message: error.message,
+            code: error.code,
+            command: error.command,
+            response: error.response,
+            responseCode: error.responseCode
+        });
+        throw error;
+    }
+}
+
+async function sendOtpEmail(to, otp, purpose = 'verification') {
+    const transporter = await createTransporter();
+    const subject = purpose === 'login' ? 'Your Portify login OTP' : 'Your Portify verification OTP';
+    const text = `Your OTP for Portify (${purpose}) is: ${otp}. It expires in 10 minutes.`;
+    const info = await transporter.sendMail({ from: process.env.SMTP_FROM || 'no-reply@portify.app', to, subject, text });
+    console.log(`OTP email sent to ${to}. messageId=${info.messageId}`);
+    return { info };
+}
+
 
 // --- API Routes ---
 
 // Auth Routes 
 // Auth routes
+app.post('/auth/test-smtp', async (req, res) => {
+    try {
+        const transporter = await createTransporter();
+        await transporter.verify();
+        res.json({ 
+            success: true, 
+            message: 'SMTP configuration is valid',
+            config: {
+                host: process.env.SMTP_HOST,
+                port: process.env.SMTP_PORT || 587,
+                secure: process.env.SMTP_SECURE === 'true',
+                user: process.env.SMTP_USER,
+                from: process.env.SMTP_FROM
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ 
+            success: false, 
+            message: 'SMTP configuration error',
+            error: error.message,
+            code: error.code
+        });
+    }
+});
+
 app.post('/auth/register', async (req, res) => {
     try {
-        const { email, password } = req.body;
-        if (!email || !password) {
-            return res.status(400).json({ message: 'Please enter all fields.' });
-        }
-
-        const existingUser = await User.findOne({ email });
+        const { email, password, username } = req.body;
+        if (!email || !password) return res.status(400).json({ message: 'Please enter all fields.' });
+        
+        // Check both email and username
+        const existingUser = await User.findOne({ 
+            $or: [
+                { email },
+                ...(username ? [{ username }] : [])
+            ]
+        });
+        
         if (existingUser) {
-            return res.status(400).json({ message: 'User already exists.' });
+            if (existingUser.email === email) {
+                return res.status(400).json({ message: 'Email already registered.' });
+            }
+            return res.status(400).json({ message: 'Username already taken.' });
         }
 
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        // Generate 6-digit OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        const otpExpires = new Date(Date.now() + 10 * 60 * 1000); 
+        const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
 
-        const newUser = new User({
-            username: req.body.username || '',
-            email,
-            password: hashedPassword,
-            otp,
-            otpExpires,
-            isVerified: false
+        const newUser = new User({ 
+            username: username || null,  
+            email, 
+            password: hashedPassword, 
+            otp, 
+            otpExpires, 
+            isVerified: false 
         });
-        await newUser.save();
 
-        console.log(`Generated OTP for ${email}: ${otp}`);
-
-        res.status(201).json({
-            message: 'Registration successful! Please verify your email with the OTP.',
-            user: { id: newUser._id, username: newUser.username, email: newUser.email },
-            otp 
+        try {
+            await newUser.save();
+            
+            try {
+                console.log('Attempting to send OTP email to:', email);
+                const { info } = await sendOtpEmail(email, otp, 'register');
+                console.log('Email sent successfully:', info.messageId);
+                return res.status(201).json({ 
+                    message: 'Registration initiated. Check email for OTP.'
+                });
+            } catch (emailErr) {
+                console.error('Failed to send email:', emailErr);
+                newUser.otp = undefined; 
+                newUser.otpExpires = undefined; 
+                await newUser.save();
+                
+                return res.status(500).json({ 
+                    message: 'Account created but failed to send verification email. Please try logging in to receive a new OTP.',
+                    error: process.env.NODE_ENV === 'development' ? emailErr.message : undefined
+                });
+            }
+        } catch (saveErr) {
+            if (saveErr.code === 11000) {
+                const field = Object.keys(saveErr.keyPattern)[0];
+                return res.status(400).json({ 
+                    message: field === 'email' ? 'Email already registered.' : 'Username already taken.'
+                });
+            }
+            throw saveErr;
+        }
+    } catch (err) {
+        console.error('Registration error:', err);
+        res.status(500).json({ 
+            message: 'Server error during registration.',
+            error: process.env.NODE_ENV === 'development' ? err.message : undefined
         });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error during registration.' });
     }
 });
 
+// verify OTP for register or login
 app.post('/auth/verify-otp', async (req, res) => {
     try {
-        const { email, otp } = req.body;
-        if (!email || !otp) {
-            return res.status(400).json({ message: 'Please provide email and OTP.' });
-        }
-
+        const { email, otp, purpose } = req.body; 
+        if (!email || !otp) return res.status(400).json({ message: 'Please provide email and OTP.' });
         const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(404).json({ message: 'User not found.' });
-        }
+        if (!user) return res.status(404).json({ message: 'User not found.' });
 
-        if (user.isVerified) {
-            return res.status(400).json({ message: 'User is already verified.' });
-        }
+        if (!user.otp || !user.otpExpires) return res.status(400).json({ message: 'No OTP was generated for this user.' });
+        if (new Date() > user.otpExpires) return res.status(400).json({ message: 'OTP has expired.' });
+        if (user.otp !== otp) return res.status(400).json({ message: 'Invalid OTP.' });
 
-        if (!user.otp || !user.otpExpires) {
-            return res.status(400).json({ message: 'No OTP was generated for this user.' });
-        }
-
-        if (new Date() > user.otpExpires) {
-            return res.status(400).json({ message: 'OTP has expired.' });
-        }
-
-        if (user.otp !== otp) {
-            return res.status(400).json({ message: 'Invalid OTP.' });
-        }
-
+        // mark verified
         user.isVerified = true;
-        user.otp = undefined;
-        user.otpExpires = undefined;
-        await user.save();
+        user.otp = undefined; user.otpExpires = undefined; await user.save();
 
-        const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET || 'your_default_secret_key_123!', { expiresIn: '24h' });
-        res.json({
-            message: 'Email verified successfully!',
-            token,
-            user: { id: user._id, username: user.username, email: user.email }
-        });
-    } catch (error) {
-        console.error('OTP verification error:', error);
+        const token = jwt.sign({ userId: user._id, email: user.email }, process.env.JWT_SECRET || 'your_default_secret_key_123!', { expiresIn: '24h' });
+        return res.json({ message: 'OTP verified', token, user: { id: user._id, username: user.username, email: user.email } });
+    } catch (err) {
+        console.error('OTP verification error:', err);
         res.status(500).json({ message: 'Server error during OTP verification.' });
     }
 });
@@ -154,24 +241,26 @@ app.post('/auth/verify-otp', async (req, res) => {
 app.post('/auth/login', async (req, res) => {
     try {
         const { email, password } = req.body;
-        if (!email || !password) {
-            return res.status(400).json({ message: 'Please enter all fields.' });
-        }
-
+        if (!email || !password) return res.status(400).json({ message: 'Please enter all fields.' });
         const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(400).json({ message: 'Invalid credentials.' });
-        }
-
+        if (!user) return res.status(400).json({ message: 'Invalid credentials.' });
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ message: 'Invalid credentials.' });
-        }
+        if (!isMatch) return res.status(400).json({ message: 'Invalid credentials.' });
 
-        const token = jwt.sign({ userId: user._id, email: user.email }, process.env.JWT_SECRET || 'your_default_secret_key_123!', { expiresIn: '24h' });
-        res.json({ message: 'Logged in successfully!', token, user: { id: user._id, username: user.username, email: user.email } });
-    } catch (error) {
-        console.error(error);
+        // generate/send login OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
+        user.otp = otp; user.otpExpires = otpExpires; await user.save();
+        try {
+            const { info } = await sendOtpEmail(email, otp, 'login');
+            return res.json({ message: 'Login OTP sent. Check your email.' });
+        } catch (emailErr) {
+            console.error('login OTP send failed', emailErr);
+            user.otp = undefined; user.otpExpires = undefined; await user.save();
+            return res.status(500).json({ message: 'Failed to send login OTP.' });
+        }
+    } catch (err) {
+        console.error(err);
         res.status(500).json({ message: 'Server error during login.' });
     }
 });

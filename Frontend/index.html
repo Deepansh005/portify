@@ -238,8 +238,10 @@
                         return;
                     }
                     console.log('Register response', result);
-                    alert(result.message + (result.otp ? `\n(OTP for testing: ${result.otp})` : ''));
+                    alert(result.message + (result.previewUrl ? `\n(Email preview: ${result.previewUrl})` : ''));
                     otpSubtitle.textContent = `We've sent a verification code to ${userEmailForOtp}.`;
+                    // mark current purpose
+                    otpForm.dataset.purpose = 'register';
                     showForm(otpFormEl);
                 } catch (error) {
                     console.error('Network/register error:', error);
@@ -250,18 +252,27 @@
             otpForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const otp = document.getElementById('otp-code').value;
+                const purpose = otpForm.dataset.purpose || 'register';
                 try {
                      const response = await fetch(`${API_URL}/auth/verify-otp`, { 
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email: userEmailForOtp, otp: otp }),
+                        body: JSON.stringify({ email: userEmailForOtp, otp: otp, purpose }),
                     });
                     const result = await response.json();
                     if (!response.ok) {
                         alert(`Error: ${result.message}`);
                         return;
                     }
-                    alert(result.message);
+                    // On successful verification we receive token & user
+                    if (result.token) {
+                        localStorage.setItem('authToken', result.token);
+                        localStorage.setItem('userName', result.user?.username || '');
+                        alert('Verification successful — Redirecting to dashboard');
+                        window.location.href = 'dashboard.html';
+                        return;
+                    }
+                    alert(result.message || 'Verified');
                     showForm(loginFormEl);
                 } catch (error) {
                      alert('Could not connect to the server.');
@@ -272,7 +283,7 @@
                 e.preventDefault();
                 const formData = new FormData(loginForm);
                 const data = Object.fromEntries(formData.entries());
-
+                userEmailForOtp = data.email;
                  try {
                     const response = await fetch(`${API_URL}/auth/login`, { 
                         method: 'POST',
@@ -284,10 +295,10 @@
                         alert(`Error: ${result.message}`);
                         return;
                     }
-                    localStorage.setItem('authToken', result.token);
-                    localStorage.setItem('userName', result.user.username || result.user.name || '');
-                    alert('Login successful! Redirecting...');
-                    window.location.href = 'dashboard.html';
+                    alert(result.message + (result.previewUrl ? `\n(Email preview: ${result.previewUrl})` : ''));
+                    otpSubtitle.textContent = `We've sent a login OTP to ${userEmailForOtp}.`;
+                    otpForm.dataset.purpose = 'login';
+                    showForm(otpFormEl);
                 } catch (error) {
                     alert('Could not connect to the server.');
                 }
