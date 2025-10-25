@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
+const axios = require("axios");
 
 const app = express();
 
