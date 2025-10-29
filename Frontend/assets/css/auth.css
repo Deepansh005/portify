@@ -1,7 +1,7 @@
 :root {
-    --primary-color: #3b82f6;
-    --primary-hover-color: #2563eb;
-    --background-color: #0f172a;
+    --primary-color: #0f437d;
+    --primary-hover-color: #0d2c62;
+    --background-color: #0b0a2a;
     --surface-color: #1e293b;
     --text-primary: #f8fafc;
     --text-secondary: #94a3b8;
@@ -15,7 +15,7 @@
 }
 
 body {
-    font-family: 'Inter', sans-serif;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
     background-color: var(--background-color);
     color: var(--text-primary);
     display: flex;
@@ -31,7 +31,7 @@ body {
     min-height: 600px;
     background-color: var(--surface-color);
     border-radius: 20px;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 20px 25px -5px rgba(255, 255, 255, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
     display: flex;
     overflow: hidden; 
     animation: fadeIn 0.8s ease-in-out;
@@ -44,7 +44,7 @@ body {
 
 .graphics-panel {
     width: 50%;
-    background: linear-gradient(160deg, #3b82f6, #8b5cf6);
+    background: linear-gradient(180deg, #e1e1e1, #191755);
     padding: 50px;
     display: flex;
     flex-direction: column;
@@ -54,6 +54,7 @@ body {
 }
 
 .graphics-panel h1 { 
+    
     font-size: 3rem; 
     font-weight: 700; 
     line-height: 1.2; 
